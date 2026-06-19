@@ -915,6 +915,23 @@
     });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// ---- SCROLL REVEAL ----
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ---- FORCE VIDEO PLAY (some browsers need a nudge) ----
+  const heroVideo = document.getElementById('heroVideo');
+  if (heroVideo) {
+    heroVideo.play().catch(() => {
+      const resume = () => { heroVideo.play(); document.removeEventListener('click', resume); };
+      document.addEventListener('click', resume);
+    });
+  }
+</script>
 </script>
 </body>
 </html>
