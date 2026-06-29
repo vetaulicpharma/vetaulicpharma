@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leva-H | Vet Aulic Pharma</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy: { 900: '#0a1628', 800: '#0f2240', 700: '#1a3355', 600: '#1e3d66' },
+          teal: { 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
+          sage: { 100: '#f0faf8', 200: '#d1f2ec', 300: '#a7e3d9' },
+          gold: { 400: '#d4a853', 500: '#c49a3c' }
+        },
+        fontFamily: {
+          display: ['Cormorant Garamond', 'serif'],
+          body: ['DM Sans', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: #fff; color: #0a1628; overflow-x: hidden; }
+
+  /* NAV */
+  #navbar { transition: all 0.4s ease; }
+  #navbar.scrolled { background: rgba(10,22,40,0.97) !important; box-shadow: 0 2px 40px rgba(0,0,0,0.3); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1.5px; background: #2dd4bf; transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+
+  /* DROPDOWN */
+  .dropdown-menu { visibility: hidden; opacity: 0; transform: translateY(12px); transition: all 0.25s ease; pointer-events: none; }
+  .dropdown:hover .dropdown-menu { visibility: visible; opacity: 1; transform: translateY(0); pointer-events: all; }
+
+  /* GRID OVERLAY */
+  .grid-overlay {
+    background-image: linear-gradient(rgba(45,212,191,0.06) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(45,212,191,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* SECTION DIVIDER */
+  .divider-teal { width: 64px; height: 3px; background: linear-gradient(90deg, #14b8a6, #2dd4bf); border-radius: 2px; }
+
+  /* MOBILE MENU */
+  #mobile-menu { transition: max-height 0.4s ease, opacity 0.3s ease; max-height: 0; overflow: hidden; opacity: 0; }
+  #mobile-menu.open { max-height: 600px; opacity: 1; }
+  .mob-dropdown { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .mob-dropdown.open { max-height: 300px; }
+
+  /* WA BUTTON */
+  .wa-btn { background: linear-gradient(135deg, #14b8a6, #0f766e); transition: all 0.3s ease; }
+  .wa-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(14,118,110,0.45); }
+  .cta-primary { background: linear-gradient(135deg, #14b8a6, #0d9488); transition: all 0.3s ease; }
+  .cta-primary:hover { background: linear-gradient(135deg, #2dd4bf, #14b8a6); transform: translateY(-2px); box-shadow: 0 10px 35px rgba(20,184,166,0.4); }
+
+  .logo-dot { animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .footer-link { transition: color 0.2s ease; }
+  .footer-link:hover { color: #2dd4bf; }
+
+  /* ===== AMAZON-STYLE GALLERY ===== */
+  .gallery-main {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    background: #f0faf8;
+    border: 1px solid #d1f2ec;
+  }
+  .gallery-main img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    background: #fff;
+    transition: opacity 0.35s ease;
+  }
+  /* placeholder look when no real image yet */
+  .gallery-slide-placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #0a1628, #0f766e);
+    color: rgba(255,255,255,0.6);
+  }
+  .gallery-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.92); color: #0a1628;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(10,22,40,0.18);
+    transition: all 0.25s ease; z-index: 5; border: none;
+  }
+  .gallery-arrow:hover { background: #14b8a6; color: #fff; transform: translateY(-50%) scale(1.08); }
+  .gallery-arrow.left { left: 14px; }
+  .gallery-arrow.right { right: 14px; }
+  .gallery-counter {
+    position: absolute; bottom: 14px; right: 14px;
+    background: rgba(10,22,40,0.75); color: #fff;
+    font-size: 12px; padding: 4px 12px; border-radius: 999px;
+    font-family: 'DM Sans', sans-serif; letter-spacing: 0.05em; z-index: 5;
+  }
+  .thumb {
+    flex: 0 0 auto;
+    width: 74px; height: 74px;
+    border-radius: 0.75rem; overflow: hidden;
+    border: 2px solid transparent; cursor: pointer;
+    background: #f0faf8; transition: all 0.2s ease;
+    position: relative;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb.active { border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.15); }
+  .thumb:hover { border-color: #2dd4bf; }
+  .thumb-ph {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2240, #0f766e); color: rgba(255,255,255,0.55); font-size: 10px;
+  }
+
+  .benefit-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .benefit-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(10,22,40,0.10); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ============================== NAVBAR ============================== -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-navy-900/95 backdrop-blur-md border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="bg-white rounded-lg p-1.5 shadow-md shadow-black/20 flex items-center justify-center">
+        <img
+            src="images/logo.png"
+            alt="Vet Aulic Pharma"
+            class="h-9 w-auto object-contain"
+        >
+    </div>
+
+    <!-- Brand Name -->
+    <div>
+        <div class="font-display text-white font-semibold text-xl leading-none tracking-wide">
+            Vet Aulic
+        </div>
+        <div class="text-teal-400 text-[10px] font-body font-medium tracking-[0.25em] uppercase">
+            Pharma
+        </div>
+    </div>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="index.html#home" class="nav-link text-white/80 hover:text-white font-body text-sm font-medium tracking-wide">Home</a>
+        <div class="dropdown relative">
+          <button class="nav-link flex items-center gap-1.5 text-white/80 hover:text-white font-body text-sm font-medium tracking-wide">About Us
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="opacity-60"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dropdown-menu absolute top-full left-0 mt-0 w-52 bg-navy-800 border border-white/8 rounded-xl shadow-2xl overflow-hidden">
+            <div class="py-1.5">
+              <a href="index.html#about" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm border-l-2 border-transparent hover:border-teal-500">Our Story</a>
+              <a href="index.html#about" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm border-l-2 border-transparent hover:border-teal-500">Vision &amp; Mission</a>
+              <a href="index.html#about" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm border-l-2 border-transparent hover:border-teal-500">Quality Standards</a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown relative">
+          <button class="nav-link flex items-center gap-1.5 text-white/80 hover:text-white font-body text-sm font-medium tracking-wide">Services
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="opacity-60"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dropdown-menu absolute top-full left-0 mt-0 w-56 bg-navy-800 border border-white/8 rounded-xl shadow-2xl overflow-hidden">
+            <div class="py-1.5">
+              <a href="#services" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Vet Support</a>
+              <a href="#services" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Farm Services</a>
+              <a href="#services" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Customer Services</a>
+              <a href="#services" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Medicine Services</a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown relative">
+          <button class="nav-link flex items-center gap-1.5 text-white/80 hover:text-white font-body text-sm font-medium tracking-wide">Products
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="opacity-60"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dropdown-menu absolute top-full left-0 mt-0 w-52 bg-navy-800 border border-white/8 rounded-xl shadow-2xl overflow-hidden">
+            <div class="py-1.5">
+              <a href="minpod-47.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm border-l-2 border-transparent hover:border-teal-500">Minpod-47</a>
+              <a href="mastiroots.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Mastiroots</a>
+              <a href="plapfort.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">P-lap Forts</a>
+              <a href="calciroot.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">CalciRoot–plus</a>
+              <a href="leva.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Leva-H</a>
+              <a href="placeout.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Place–out</a>
+              <a href="livbeing.html" class="block px-5 py-3 text-white/75 hover:text-white hover:bg-white/5 font-body text-sm transition-all duration-150 border-l-2 border-transparent hover:border-teal-500">Liv-Being</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#blog" class="nav-link text-white/80 hover:text-white font-body text-sm font-medium tracking-wide">Blog</a>
+        <a href="https://wa.me/919780889942" target="_blank" rel="noopener" class="wa-btn px-5 py-2.5 rounded-full text-white font-body text-sm font-semibold tracking-wide flex items-center gap-2 shadow-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Inquiry
+        </a>
+      </div>
+
+      <button class="lg:hidden flex flex-col gap-1.5 p-2" onclick="toggleMobile()">
+        <span id="b1" class="w-6 h-0.5 bg-white transition-all duration-300"></span>
+        <span id="b2" class="w-6 h-0.5 bg-white transition-all duration-300"></span>
+        <span id="b3" class="w-6 h-0.5 bg-white transition-all duration-300"></span>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="lg:hidden bg-navy-900 border-t border-white/5">
+    <div class="px-5 py-4 space-y-1">
+      <a href="index.html#home" class="block py-3 text-white/80 hover:text-teal-400 font-body text-sm font-medium border-b border-white/5">Home</a>
+      <a href="index.html#about" class="block py-3 text-white/80 hover:text-teal-400 font-body text-sm font-medium border-b border-white/5">About Us</a>
+      <a href="index.html#services" class="block py-3 text-white/80 hover:text-teal-400 font-body text-sm font-medium border-b border-white/5">Services</a>
+      <a href="index.html#products" class="block py-3 text-white/80 hover:text-teal-400 font-body text-sm font-medium border-b border-white/5">Products</a>
+      <a href="index.html#blog" class="block py-3 text-white/80 hover:text-teal-400 font-body text-sm font-medium border-b border-white/5">Blog</a>
+      <a href="https://wa.me/919780889942" target="_blank" rel="noopener" class="flex items-center gap-2 mt-0 wa-btn px-5 py-3 rounded-full text-white font-body text-sm font-semibold justify-center">Send Inquiry on WhatsApp</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ============================== BREADCRUMB ============================== -->
+<div class="pt-28 pb-2 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <nav class="flex items-center gap-2 font-body text-sm text-gray-400">
+      <a href="index.html" class="hover:text-teal-600 transition-colors">Home</a>
+      <span>/</span>
+      <a href="index.html#products" class="hover:text-teal-600 transition-colors">Products</a>
+      <span>/</span>
+      <span class="text-navy-900 font-medium">Leva-H</span>
+    </nav>
+  </div>
+</div>
+
+
+<!-- ============================== PRODUCT HERO (GALLERY + INFO) ============================== -->
+<section class="pt-6 pb-20 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+
+      <!-- ===== LEFT: AMAZON-STYLE GALLERY ===== -->
+      <div class="reveal">
+        <!-- MAIN IMAGE -->
+        <div class="gallery-main" id="galleryMain">
+          <!-- Real <img> tags below. Until you add real photos, the placeholder shows.
+               TO ADD REAL PHOTOS: set the src of each image (img1..img5) to your file,
+               e.g. src="images/leva-1.jpg" and the placeholders disappear automatically. -->
+          <img id="mainImg" src="" alt="Leva-H product image" style="display:none;" />
+          <div class="gallery-slide-placeholder" id="mainPlaceholder">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" class="text-teal-400 opacity-70">
+              <path d="M3 8.5A2.5 2.5 0 015.5 6h2l1-2h7l1 2h2A2.5 2.5 0 0121 8.5v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9z" stroke="currentColor" stroke-width="1.6"/>
+              <circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <span class="font-body text-sm tracking-wide" id="placeholderLabel">Product Image 1</span>
+            <span class="font-body text-xs text-white/40">Replace with real photo</span>
+          </div>
+          <button class="gallery-arrow left" onclick="changeSlide(-1)" aria-label="Previous image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="gallery-arrow right" onclick="changeSlide(1)" aria-label="Next image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="gallery-counter"><span id="counterNow">1</span> / 5</div>
+        </div>
+
+        <!-- THUMBNAIL STRIP -->
+        <div class="flex gap-3 mt-4 overflow-x-auto pb-2" id="thumbStrip">
+          <!-- 5 thumbnails; click to switch. Set each <img src> to your real photo. -->
+          <div class="thumb active" onclick="goToSlide(0)">
+            <img src="" alt="thumb 1" style="display:none;" />
+            <div class="thumb-ph">IMG 1</div>
+          </div>
+          <div class="thumb" onclick="goToSlide(1)">
+            <img src="" alt="thumb 2" style="display:none;" />
+            <div class="thumb-ph">IMG 2</div>
+          </div>
+          <div class="thumb" onclick="goToSlide(2)">
+            <img src="" alt="thumb 3" style="display:none;" />
+            <div class="thumb-ph">IMG 3</div>
+          </div>
+          <div class="thumb" onclick="goToSlide(3)">
+            <img src="" alt="thumb 4" style="display:none;" />
+            <div class="thumb-ph">IMG 4</div>
+          </div>
+          <div class="thumb" onclick="goToSlide(4)">
+            <img src="" alt="thumb 5" style="display:none;" />
+            <div class="thumb-ph">IMG 5</div>
+          </div>
+        </div>
+        <p class="font-body text-xs text-gray-400 mt-0 flex items-center gap-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-teal-500"><path d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Tap a thumbnail or use the arrows to view all product images.
+        </p>
+      </div>
+
+      <!-- ===== RIGHT: PRODUCT INFO ===== -->
+      <div class="reveal">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="bg-teal-400/15 text-teal-700 font-body text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full border border-teal-200">Udder &amp; Immunity Care</span>
+          <span class="bg-sage-100 text-teal-700 font-body text-xs tracking-wide uppercase px-3 py-1.5 rounded-full">Leva-H</span>
+        </div>
+
+        <h1 class="font-display text-navy-900 text-4xl md:text-5xl font-semibold leading-tight mb-3">Leva-H</h1>
+        <p class="font-body text-gray-600 text-base leading-relaxed mb-6">
+          A complete udder-health and immunity tonic that supports the overall health of the udder, builds natural immunity against mastitis, and acts as a valuable supporting therapy during mastitis treatment. Leva-H also helps reduce hair fall and promotes a healthy, shining skin and coat — keeping dairy animals productive and in prime condition.
+        </p>
+
+        <!-- DOSE CARD -->
+        <div class="bg-navy-900 rounded-2xl p-6 mb-7">
+          <div class="flex items-center gap-2 mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-teal-400"><path d="M9 12h6m-3-3v6M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <span class="font-display text-white text-xl font-medium">Recommended Dose</span>
+            <span class="font-body text-teal-400 text-xs uppercase tracking-widest ml-1">Per Day</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div class="font-body text-white/50 text-xs uppercase tracking-wider mb-1">Cattle &amp; Buffalo</div>
+              <div class="font-display text-teal-300 text-2xl font-semibold">10 <span class="text-base text-white/60">ml</span></div>
+              <div class="font-body text-white/40 text-xs mt-1">Large animals</div>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div class="font-body text-white/50 text-xs uppercase tracking-wider mb-1">Calf</div>
+              <div class="font-display text-teal-300 text-2xl font-semibold">5 <span class="text-base text-white/60">ml</span></div>
+              <div class="font-body text-white/40 text-xs mt-1">Young animals</div>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div class="font-body text-white/50 text-xs uppercase tracking-wider mb-1">Sheep &amp; Goats</div>
+              <div class="font-display text-teal-300 text-2xl font-semibold">1–2 <span class="text-base text-white/60">ml</span></div>
+              <div class="font-body text-white/40 text-xs mt-1">Small ruminants</div>
+            </div>
+          </div>
+          <p class="font-body text-white/40 text-xs mt-4">Or as directed by a registered veterinarian. Shake well before use.</p>
+        </div>
+
+        <!-- CTA BUTTONS -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+          <a href="https://wa.me/919780889942?text=Hi%2C%20I%20am%20interested%20in%20Leva-H.%20Please%20share%20details." target="_blank" rel="noopener" class="wa-btn flex-1 inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full text-white font-body font-semibold text-sm tracking-wide shadow-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Inquire on WhatsApp
+          </a>
+          <a href="index.html#products" class="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full text-navy-900 font-body font-medium text-sm tracking-wide border border-gray-200 hover:border-teal-500 hover:text-teal-700 transition-all duration-300">
+            ← Back to Products
+          </a>
+        </div>
+
+        <!-- TRUST STRIP -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-gray-100">
+          <span class="flex items-center gap-1.5 font-body text-xs text-gray-500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M9 12l2 2 4-4M12 3l8 4v6c0 4-3 7-8 8-5-1-8-4-8-8V7l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> GMP Certified</span>
+          <span class="flex items-center gap-1.5 font-body text-xs text-gray-500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M9 12l2 2 4-4M12 3l8 4v6c0 4-3 7-8 8-5-1-8-4-8-8V7l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Lab Tested Quality</span>
+          <span class="flex items-center gap-1.5 font-body text-xs text-gray-500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M9 12l2 2 4-4M12 3l8 4v6c0 4-3 7-8 8-5-1-8-4-8-8V7l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Made in India</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================== KEY BENEFITS ============================== -->
+<section class="py-20 bg-sage-100">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="text-center mb-12 reveal">
+      <div class="inline-flex items-center gap-2 text-teal-600 font-body text-xs font-semibold tracking-[0.25em] uppercase mb-4">
+        <span class="divider-teal"></span> Indications &amp; Benefits <span class="divider-teal"></span>
+      </div>
+      <h2 class="font-display text-navy-900 text-4xl md:text-5xl font-light">Why Choose <em class="italic text-teal-600">Leva-H</em></h2>
+      <p class="font-body text-gray-500 text-base mt-4 max-w-2xl mx-auto">Complete udder care and immunity support — protecting against mastitis, improving milk capacity, and promoting a healthy coat.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 1 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M12 3l8 4v5c0 4-3 7-8 9-5-2-8-5-8-9V7l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Protects Against Udder Swelling</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Helps prevent and reduce swelling and inflammation of the udder, supporting overall udder health and comfort in dairy animals.</p>
+      </div>
+      <!-- 2 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M12 2l2 5 5 .5-4 3.5 1.5 5L12 18l-4.5 3 1.5-5-4-3.5 5-.5L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Reduces Hair Fall</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Helps control excessive hair fall and supports a fuller, healthier coat — a visible sign of good nutrition and wellbeing.</p>
+      </div>
+      <!-- 3 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M6 3h12l-1 9a5 5 0 01-10 0L6 3zM9 21h6M12 17v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Improves Milk-Holding Capacity</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Supports improvement in the animal's milk-holding capacity, helping maintain steady, healthy milk production.</p>
+      </div>
+      <!-- 4 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M12 21s-6.5-4.35-9-8.5C1 8.5 3 5 6.5 5 9 5 12 8 12 8s3-3 5.5-3C21 5 23 8.5 21 12.5 18.5 16.65 12 21 12 21z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Improves Reproductive Ratio</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Aids in improving the reproductive ratio of the herd, supporting healthier and more consistent breeding outcomes.</p>
+      </div>
+      <!-- 5 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M13 2L4.5 12.5a1 1 0 00.8 1.6H11l-1 7.9 8.5-10.5a1 1 0 00-.8-1.6H12l1-7.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Boosts Stamina &amp; Reduces Stress</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Helps increase stamina and endurance while reducing the effects of heat and handling stress, keeping animals calm and active.</p>
+      </div>
+      <!-- 6 -->
+      <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 reveal">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-teal-600"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display text-navy-900 text-xl font-semibold mb-2">Improves Body Coat</h3>
+        <p class="font-body text-gray-500 text-sm leading-relaxed">Promotes a smooth, glossy body coat and shining skin, reflecting the strong overall health of well-nourished animals.</p>
+      </div>
+
+      <!-- CTA TILE -->
+      <div class="bg-gradient-to-br from-navy-900 to-teal-800 rounded-2xl p-7 flex flex-col justify-center reveal">
+        <h3 class="font-display text-white text-2xl font-semibold mb-2">Ready to order Leva-H?</h3>
+        <p class="font-body text-white/60 text-sm leading-relaxed mb-5">Get pricing, packaging options, and bulk / distributor enquiries answered instantly.</p>
+        <a href="https://wa.me/919780889942?text=Hi%2C%20I%20am%20interested%20in%20Leva-H." target="_blank" rel="noopener" class="wa-btn inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-body font-semibold text-sm tracking-wide self-start">
+          Chat Now
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================== AT A GLANCE ============================== -->
+<section class="py-20 bg-white">
+  <div class="max-w-5xl mx-auto px-5 lg:px-8 reveal">
+    <h2 class="font-display text-navy-900 text-3xl md:text-4xl font-light text-center mb-10">Product at a Glance</h2>
+    <div class="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        <div class="p-6 text-center">
+          <div class="font-body text-gray-400 text-xs uppercase tracking-widest mb-2">Product Name</div>
+          <div class="font-display text-navy-900 text-2xl font-semibold">Leva-H</div>
+        </div>
+        <div class="p-6 text-center">
+          <div class="font-body text-gray-400 text-xs uppercase tracking-widest mb-2">Category</div>
+          <div class="font-display text-navy-900 text-2xl font-semibold">Udder &amp; Immunity</div>
+        </div>
+        <div class="p-6 text-center">
+          <div class="font-body text-gray-400 text-xs uppercase tracking-widest mb-2">Suitable For</div>
+          <div class="font-display text-navy-900 text-2xl font-semibold">All Livestock</div>
+        </div>
+      </div>
+      <div class="bg-sage-100 px-6 py-5 border-t border-teal-100">
+        <p class="font-body text-teal-800 text-sm text-center leading-relaxed">
+          <strong>Dose:</strong> Cattle &amp; Buffalo 10 ml &nbsp;•&nbsp; Calf 5 ml &nbsp;•&nbsp; Sheep &amp; Goats 1–2 ml per day &nbsp;•&nbsp; or as advised by a veterinarian.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================== FINAL CTA ============================== -->
+<section class="py-20 bg-gradient-to-r from-navy-900 via-teal-900 to-navy-900 relative overflow-hidden">
+  <div class="absolute inset-0 grid-overlay pointer-events-none"></div>
+  <div class="relative z-10 max-w-3xl mx-auto px-5 text-center reveal">
+    <h2 class="font-display text-white text-3xl md:text-4xl font-light mb-4">Have questions about <em class="italic text-teal-300">Leva-H?</em></h2>
+    <p class="font-body text-white/60 text-base leading-relaxed mb-8">Our technical team is happy to guide you on dosage, suitability, and ordering — whether you're a farmer, veterinarian, or distributor.</p>
+    <a href="https://wa.me/919780889942?text=Hi%2C%20I%20have%20a%20question%20about%20Leva-H." target="_blank" rel="noopener" class="wa-btn inline-flex items-center gap-3 px-9 py-4 rounded-full text-white font-body font-semibold text-base tracking-wide shadow-2xl">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Chat on WhatsApp — +91 97808 89942
+    </a>
+  </div>
+</section>
+
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="bg-navy-900 border-t border-white/5 py-14">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="grid md:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="flex items-center gap-3 mb-5">
+          <div class="bg-white rounded-lg p-1.5 shadow-md shadow-black/20 flex items-center justify-center">
+        <img
+            src="images/logo.png"
+            alt="Vet Aulic Pharma"
+            class="h-9 w-auto object-contain"
+        >
+    </div>
+
+    <!-- Brand Name -->
+          <div>
+            <div class="font-display text-white font-semibold text-xl">Vet Aulic Pharma</div>
+            <div class="text-teal-400 text-[10px] font-body font-medium tracking-[0.2em] uppercase">Advanced Veterinary Science</div>
+          </div>
+        </div>
+        <p class="font-body text-white/45 text-sm leading-relaxed max-w-xs">Empowering livestock health through science-backed pharmaceutical formulations, trusted by veterinarians and farmers across India.</p>
+      </div>
+      <div>
+        <div class="font-body text-white font-semibold text-sm mb-4 tracking-wide">Quick Links</div>
+        <div class="space-y-3">
+          <a href="index.html#home" class="footer-link block font-body text-white/45 text-sm">Home</a>
+          <a href="index.html#about" class="footer-link block font-body text-white/45 text-sm">About Us</a>
+          <a href="index.html#services" class="footer-link block font-body text-white/45 text-sm">Services</a>
+          <a href="index.html#products" class="footer-link block font-body text-white/45 text-sm">Products</a>
+        </div>
+      </div>
+      <div>
+        <div class="font-body text-white font-semibold text-sm mb-4 tracking-wide">Get in Touch</div>
+        <a href="https://wa.me/919780889942" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-teal-400 font-body text-sm font-medium hover:text-teal-300 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          +91 97808 89942
+        </a>
+      </div>
+    </div>
+    <div class="border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+      <div class="font-body text-white/30 text-xs">© 2025 Vet Aulic Pharma. All rights reserved.</div>
+      <div class="font-body text-white/30 text-xs">Committed to Animal Welfare · GMP Certified · Made in India</div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ============================== SCRIPTS ============================== -->
+<script>
+  // ---- NAVBAR SCROLL ----
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ---- MOBILE MENU ----
+  let mobileOpen = false;
+  function toggleMobile() {
+    mobileOpen = !mobileOpen;
+    document.getElementById('mobile-menu').classList.toggle('open', mobileOpen);
+    const b1 = document.getElementById('b1'), b2 = document.getElementById('b2'), b3 = document.getElementById('b3');
+    if (mobileOpen) {
+      b1.style.transform = 'translateY(8px) rotate(45deg)';
+      b2.style.opacity = '0';
+      b3.style.transform = 'translateY(-8px) rotate(-45deg)';
+    } else {
+      b1.style.transform = ''; b2.style.opacity = '1'; b3.style.transform = '';
+    }
+  }
+
+  // ---- IMAGE GALLERY (Amazon-style) ----
+  const totalSlides = 5;
+  let currentSlide = 0;
+
+  const mainImg = document.getElementById('mainImg');
+  const mainPlaceholder = document.getElementById('mainPlaceholder');
+  const placeholderLabel = document.getElementById('placeholderLabel');
+  const counterNow = document.getElementById('counterNow');
+  const thumbs = document.querySelectorAll('#thumbStrip .thumb');
+
+  function renderSlide() {
+    // grab the matching thumbnail's <img src> as the source of truth for this slide
+    const thumbImg = thumbs[currentSlide].querySelector('img');
+    const src = thumbImg ? thumbImg.getAttribute('src') : '';
+
+    if (src && src.trim() !== '') {
+      // real image available → show it
+      mainImg.src = src;
+      mainImg.style.display = 'block';
+      mainPlaceholder.style.display = 'none';
+    } else {
+      // no image yet → show placeholder
+      mainImg.style.display = 'none';
+      mainPlaceholder.style.display = 'flex';
+      placeholderLabel.textContent = 'Product Image ' + (currentSlide + 1);
+    }
+
+    counterNow.textContent = currentSlide + 1;
+    thumbs.forEach((t, i) => t.classList.toggle('active', i === currentSlide));
+  }
+
+  function changeSlide(dir) {
+    currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
+    renderSlide();
+  }
+  function goToSlide(i) {
+    currentSlide = i;
+    renderSlide();
+  }
+
+  // If a thumbnail has a real image, reveal it (hides its "IMG N" placeholder badge)
+  thumbs.forEach(t => {
+    const img = t.querySelector('img');
+    const ph = t.querySelector('.thumb-ph');
+    if (img && img.getAttribute('src') && img.getAttribute('src').trim() !== '') {
+      img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    }
+  });
+
+  // keyboard arrows
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+  });
+
+  renderSlide();
+
+  // ---- SCROLL REVEAL ----
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
